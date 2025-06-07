@@ -41,10 +41,10 @@ const Home: React.FC = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("https://34.30.181.73/process-image/", {
+      const response = await fetch("https://34.30.181.73/process-image", {
         method: "POST",
         body: formData,
-        signal: controller.signal, // Attach abort signal here
+        signal: controller.signal,
       });
 
       if (!response.ok) {
