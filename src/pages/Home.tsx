@@ -41,7 +41,7 @@ const Home: React.FC = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("https://34.30.181.73/process-image", {
+      const response = await fetch("https://tahu-isi.et.r.appspot.com/process-image", {
         method: "POST",
         body: formData,
         signal: controller.signal,
