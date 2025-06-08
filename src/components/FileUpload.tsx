@@ -7,7 +7,7 @@ interface FileUploadProps {
   onReset: () => void;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFileSelected, onReset }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onFileSelected, isProcessing, onReset }) => {
   const [dragActive, setDragActive] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showCameraOverlay, setShowCameraOverlay] = useState(false);
@@ -141,11 +141,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelected, onReset }) => {
       {/* Upload Area */}
       {!previewUrl ? (
         <div
-          className={`relative border-2 border-dashed rounded-xl p-8 transition-colors ${
-            dragActive
+          className={`relative border-2 border-dashed rounded-xl p-8 transition-colors ${dragActive
               ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20"
               : "border-gray-300 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-600"
-          }`}
+            }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
@@ -203,6 +202,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelected, onReset }) => {
             >
               <RotateCw className="w-5 h-5" />
             </button>
+          )}
+          {isProcessing && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm font-medium">Memproses gambar...</span>
+              </div>
+            </div>
           )}
         </div>
       )}

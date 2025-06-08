@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import FileUpload from "../components/FileUpload";
 import NutritionSummary from "../components/NutritionSummary";
-import OCRResults from "../components/OCRResults";
 
 type OCRResult = {
   nutrients: Record<string, string> | null;
@@ -115,15 +114,11 @@ const Home: React.FC = () => {
       {(result.nutrients || result.analysis || result.isLoading) && (
         <section
           key={resetCounter}
-          className="max-w-4xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6"
+          className="max-w-4xl mx-auto mt-8"
         >
           <NutritionSummary
             nutrients={result.nutrients}
             analysis={result.analysis}
-            isLoading={result.isLoading}
-          />
-          <OCRResults
-            nutrients={result.nutrients}
             isLoading={result.isLoading}
           />
         </section>
