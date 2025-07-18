@@ -1,6 +1,9 @@
 import React, { useState, useRef } from "react";
 import FileUpload from "../components/FileUpload";
 import NutritionSummary from "../components/NutritionSummary";
+import ChatbotOverlay from "../components/ChatbotOverlay";
+import { MessageCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type OCRResult = {
   nutrients: Record<string, string> | null;
@@ -18,10 +21,10 @@ const Home: React.FC = () => {
   });
 
   const [resetCounter, setResetCounter] = useState(0);
+  const [showChatbot, setShowChatbot] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleFileSelected = async (file: File) => {
-    // Abort previous request if any
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -40,7 +43,7 @@ const Home: React.FC = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("https://tahu-isi.et.r.appspot.com/process-image", {
+      const response = await fetch("http://127.0.0.1:8000/process-image", {
         method: "POST",
         body: formData,
         signal: controller.signal,
@@ -57,24 +60,23 @@ const Home: React.FC = () => {
         isLoading: false,
         error: null,
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      if (error.name === "AbortError") {
-        // Fetch was aborted, don't update state
+    } catch (error: unknown) {
+      if (error instanceof DOMException && error.name === "AbortError") {
         console.log("Fetch aborted");
         return;
       }
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       setResult({
         nutrients: null,
         analysis: null,
         isLoading: false,
-        error: error.message,
+        error: errorMessage,
       });
     }
   };
 
   const handleReset = () => {
-    // Abort ongoing request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -91,16 +93,14 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 relative">
       <section className="max-w-4xl mx-auto mb-10">
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            Pemindai Informasi Gizi
+            Nutrition Scanner
           </h2>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Unggah gambar label gizi dan kami akan mengekstrak informasinya
-            untuk Anda. AI kami akan menganalisis label dan memberikan rincian
-            lengkap kandungan gizinya.
+            Upload a nutrition label image and our AI will extract the details and analyze the nutritional content for you.
           </p>
         </div>
 
@@ -112,10 +112,7 @@ const Home: React.FC = () => {
       </section>
 
       {(result.nutrients || result.analysis || result.isLoading) && (
-        <section
-          key={resetCounter}
-          className="max-w-4xl mx-auto mt-8"
-        >
+        <section key={resetCounter} className="max-w-4xl mx-auto mt-8">
           <NutritionSummary
             nutrients={result.nutrients}
             analysis={result.analysis}
@@ -123,6 +120,29 @@ const Home: React.FC = () => {
           />
         </section>
       )}
+
+      {/* Floating Chatbot Button with Animation */}
+      <AnimatePresence>
+        {!showChatbot && (
+          <motion.button
+            onClick={() => setShowChatbot(true)}
+            className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            aria-label="Open Chatbot"
+          >
+            <MessageCircle size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showChatbot && (
+          <ChatbotOverlay onClose={() => setShowChatbot(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
